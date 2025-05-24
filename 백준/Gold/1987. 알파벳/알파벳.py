@@ -1,31 +1,37 @@
 import sys
 input = sys.stdin.readline
-sys.setrecursionlimit(100000)
+sys.setrecursionlimit(10000)
+
+R, C = map(int, input().split())
+board = [list(input().strip()) for _ in range(R)]
 
 dx = [1, -1, 0, 0]
 dy = [0, 0, 1, -1]
 
-def dfs(x, y, visited):
+visited_cache = set()
+
+answer = 0
+
+def dfs(x, y, mask, length):
     global answer
-    answer = max(answer, len(visited))
     
+    if (x, y, mask) in visited_cache:
+        return
+    visited_cache.add((x, y, mask))
+
+    answer = max(answer, length)
+
     for i in range(4):
         nx = x + dx[i]
         ny = y + dy[i]
-        
         if 0 <= nx < C and 0 <= ny < R:
             ch = board[ny][nx]
-            if ch not in visited:
-                visited.add(ch)
-                dfs(nx, ny, visited)
-                visited.remove(ch)
-    
-    
-R, C = map(int, input().split())
-board = [list(map(str, input().rstrip())) for _ in range(R)]
-answer = 0
-visited = set()
-visited.add(board[0][0])
-dfs(0, 0, visited)
+            bit = ord(ch) - ord('A')
+
+            if not (mask & (1 << bit)):
+                dfs(nx, ny, mask | (1 << bit), length + 1)
+
+start_bit = 1 << (ord(board[0][0]) - ord('A'))
+dfs(0, 0, start_bit, 1)
 
 print(answer)
